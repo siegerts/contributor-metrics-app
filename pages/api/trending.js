@@ -2,11 +2,14 @@ import prisma from "../../lib/prisma";
 
 export default async function handle(req, res) {
   const evts = await prisma.$queryRaw`
-  SELECT
+  SELECT * from
+	(select
 	issues.id,
+	ROW_NUMBER() over (PARTITION BY issues.repo order by events.comments desc) as rownum,
 	issues.repo,
 	issues.title,
 	issues.html_url,
+	issues.user->>'avatar_url' as avatar,
 	events.*
 	from
     (
@@ -22,16 +25,15 @@ export default async function handle(req, res) {
 		sum((reactions->'confused')::int) as confused,
 		sum((reactions->'total_count')::int) as total_count
 		FROM public.events 
-		where event='commented' and updated_at > now() - INTERVAL'2 week'
+		where username not in (select login from public.members) and 
+			  updated_at >= now() - INTERVAL'1 week'
 		group by issue_id
 	) as events
 	inner join
 	public.issues using (id)
- -- where issues.state='open'
-	order by repo, comments desc;
+	where issues.state='open'
+	order by repo, comments desc) trends where trends.rownum <= 10;
   `;
-
-  //   console.log(evts);
 
   res.json(evts);
 }
