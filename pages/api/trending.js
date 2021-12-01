@@ -4,13 +4,25 @@ export default async function handle(req, res) {
   const evts = await prisma.$queryRaw`
   SELECT * from
 	(select
-	issues.id,
-	ROW_NUMBER() over (PARTITION BY issues.repo order by events.comments desc) as rownum,
-	issues.repo,
-	issues.title,
-	issues.html_url,
-	issues.user->>'avatar_url' as avatar,
-	events.*
+		issues.id,
+		ROW_NUMBER() over (PARTITION BY issues.repo order by events.comments desc) as rownum,
+		issues.repo,
+		issues.title,
+		issues.html_url,
+		issues.username,
+		issues.user->>'avatar_url' as avatar,
+		issues.created_at,
+		issues.updated_at,
+		events.*,
+		(events."+1" + (issues.reactions->'+1')::int) as "+1",
+		(events."-1" + (issues.reactions->'-1')::int) as "-1",
+		(events.eyes + (issues.reactions->'eyes')::int) as eyes,
+		(events.heart + (issues.reactions->'heart')::int) as heart,
+		(events.laugh + (issues.reactions->'laugh')::int) as laugh,
+		(events.hooray + (issues.reactions->'hooray')::int) as hooray,
+		(events.rocket + (issues.reactions->'rocket')::int) as rocket,
+		(events.confused + (issues.reactions->'confused')::int) as confused,
+		(events.total_count + (issues.reactions->'total_count')::int) as total_count
 	from
     (
 		select issue_id as id,
@@ -32,7 +44,18 @@ export default async function handle(req, res) {
 	inner join
 	public.issues using (id)
 	where issues.state='open'
-	order by repo, comments desc) trends where trends.rownum <= 10;
+	order by repo, comments desc) trends 
+	left outer join
+	(
+		SELECT username, repo, count(*) as user_bug_count
+		FROM public.issues 
+		cross join jsonb_array_elements(array_to_json(labels)::jsonb) as label
+		where value->>'name'='bug'
+		group by repo, "user", username
+	) bug_count
+	using (username, repo)
+	where trends.rownum <= 10
+	order by trends.repo, trends.comments desc, updated_at;
   `;
 
   res.json(evts);
