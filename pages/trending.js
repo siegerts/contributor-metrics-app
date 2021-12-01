@@ -16,6 +16,7 @@ import {
   TabList,
   TabPanel,
   TabPanels,
+  useToast,
 } from "@chakra-ui/react";
 
 import { ExternalLinkIcon } from "@chakra-ui/icons";
@@ -90,8 +91,16 @@ export async function getServerSideProps({ req }) {
 }
 
 function Trending() {
+  const toast = useToast();
   const { data: evts, error } = useSWR("/api/trending", fetcher, {
-    refreshInterval: 1000 * 60 * 5,
+    refreshInterval: 1000 * 5 * 60,
+    onSuccess: () => {
+      toast({
+        title: "Data refreshed",
+        position: "bottom-right",
+        isClosable: true,
+      });
+    },
   });
   const repos = [...new Set(evts.map((issue) => issue.repo))];
   return (

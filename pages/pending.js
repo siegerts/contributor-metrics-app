@@ -16,6 +16,7 @@ import {
   TabList,
   TabPanel,
   TabPanels,
+  useToast,
 } from "@chakra-ui/react";
 
 import { ExternalLinkIcon } from "@chakra-ui/icons";
@@ -55,9 +56,17 @@ order by repo, issues.id;
   };
 }
 
-function Trending() {
+function NeedsResponse() {
+  const toast = useToast();
   const { data: evts, error } = useSWR("/api/pending", fetcher, {
     refreshInterval: 1000 * 60 * 5,
+    onSuccess: () => {
+      toast({
+        title: "Data refreshed",
+        position: "bottom-right",
+        isClosable: true,
+      });
+    },
   });
   const repos = [...new Set(evts.map((issue) => issue.repo))];
   return (
@@ -122,7 +131,7 @@ export default function Page({ fallback }) {
       <Text fontSize="s" my="5"></Text>
 
       <SWRConfig value={{ fallback }}>
-        <Trending />
+        <NeedsResponse />
       </SWRConfig>
     </Container>
   );
