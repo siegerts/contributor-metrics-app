@@ -149,7 +149,7 @@ function Trending() {
                         </Text>
                         <Text mx="1" fontSize="s">
                           {issue.comments} recent comments
-                          <Tag mr={2}>👍 {issue["+1"]}</Tag>
+                          <Tag mx={2}>👍 {issue["+1"]}</Tag>
                           <Tag mr={2}>
                             👎
                             {issue["-1"]}
