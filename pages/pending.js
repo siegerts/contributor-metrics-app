@@ -25,7 +25,7 @@ const fetcher = (url) => fetch(url).then((res) => res.json());
 
 export async function getServerSideProps({ req }) {
   const evts = await prisma.$queryRaw`
-SELECT distinct
+  SELECT distinct
 	issues.repo,
 	issues.title,
 	issues.id,
@@ -35,15 +35,24 @@ SELECT distinct
 	issues.created_at,
 	issues.updated_at,
     issues.state,
-	events.created_at as evt_created
+	events.updated_at as evt_updated_at,
+	events.max_date
 FROM public.issues
 cross join jsonb_array_elements(array_to_json(labels)::jsonb) as label
 inner join 
-(select issue_id as id, username, event, created_at from public.events where event='commented') events using (id)
-where (label->>'name' LIKE 'pending%response%' or label->>'name' LIKE 'pending-close%') and 
-	issues.state='open' and
-	events.created_at >= issues.updated_at and 
-	events.username not in (select login from public.members)
+	(select 
+	 	issue_id as id,
+	 	username,
+	 	updated_at,
+	 	max(updated_at) over (PARTITION BY issue_id) as max_date
+	 from public.events 
+	 where event='commented'
+	) events 
+using (id)
+where (label->>'name' LIKE 'pending%response%' or label->>'name' LIKE 'pending-close%') 
+	and issues.state='open'
+	and events.updated_at = events.max_date
+	and events.username not in (select login from public.members)
 order by repo, issues.id;
   `;
 
