@@ -8,8 +8,13 @@ import {
   Box,
   Avatar,
   AvatarBadge,
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbSeparator,
   Badge,
   Text,
+  Tag,
   Link,
   Tabs,
   Tab,
@@ -143,10 +148,14 @@ function Trending() {
                           </Link>
                         </Text>
                         <Text mx="1" fontSize="s">
-                          {/* total/recent */}
-                          {issue.comments} recent comments | 👍 {issue["+1"]} |
-                          👎
-                          {issue["-1"]}| 👀 {issue.eyes} | ❤️ {issue["heart"]}
+                          {issue.comments} recent comments
+                          <Tag mr={2}>👍 {issue["+1"]}</Tag>
+                          <Tag mr={2}>
+                            👎
+                            {issue["-1"]}
+                          </Tag>
+                          <Tag mr={2}>👀 {issue.eyes}</Tag>
+                          <Tag mr={2}>❤️ {issue["heart"]}</Tag>
                         </Text>
                       </Box>
                     </Flex>
@@ -165,7 +174,15 @@ export default function Page({ fallback }) {
   // if (!data) return <div>Loading...</div>;
 
   return (
-    <Container maxW="container.lg">
+    <Container maxW="container.lg" my={5}>
+      <Breadcrumb fontWeight="medium" fontSize="sm">
+        <BreadcrumbItem>
+          <BreadcrumbLink href="/">Home</BreadcrumbLink>
+        </BreadcrumbItem>
+        <BreadcrumbItem isCurrentPage>
+          <BreadcrumbLink href="#">Trending</BreadcrumbLink>
+        </BreadcrumbItem>
+      </Breadcrumb>
       <Heading my="5">Trending</Heading>
       <Text fontSize="s" my="5">
         Most active issues during the last week. All activity is based on

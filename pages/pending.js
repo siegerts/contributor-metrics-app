@@ -7,6 +7,10 @@ import {
   Flex,
   Box,
   Avatar,
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbSeparator,
   AvatarBadge,
   Badge,
   Text,
@@ -135,7 +139,15 @@ export default function Page({ fallback }) {
   // if (!data) return <div>Loading...</div>;
 
   return (
-    <Container maxW="container.lg">
+    <Container maxW="container.lg" my={5}>
+      <Breadcrumb fontWeight="medium" fontSize="sm">
+        <BreadcrumbItem>
+          <BreadcrumbLink href="/">Home</BreadcrumbLink>
+        </BreadcrumbItem>
+        <BreadcrumbItem isCurrentPage>
+          <BreadcrumbLink href="#">Pending</BreadcrumbLink>
+        </BreadcrumbItem>
+      </Breadcrumb>
       <Heading my="5">Needs response</Heading>
       <Text fontSize="s" my="5"></Text>
 
