@@ -11,7 +11,6 @@ import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
-  BreadcrumbSeparator,
   Badge,
   Text,
   Tag,
@@ -24,12 +23,14 @@ import {
   useToast,
 } from "@chakra-ui/react";
 
+import { FiTrendingUp } from "react-icons/fi";
+
 import { ExternalLinkIcon } from "@chakra-ui/icons";
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
 export async function getServerSideProps({ req }) {
-  const evts = await prisma.$queryRaw`
+  const trendingByRepo = await prisma.$queryRaw`
   SELECT * from
 	(select
     issues.id,
@@ -89,7 +90,7 @@ export async function getServerSideProps({ req }) {
   return {
     props: {
       fallback: {
-        "/api/trending": evts,
+        "/api/trending": trendingByRepo,
       },
     },
   };
@@ -97,7 +98,7 @@ export async function getServerSideProps({ req }) {
 
 function Trending() {
   const toast = useToast();
-  const { data: evts, error } = useSWR("/api/trending", fetcher, {
+  const { data: issues, error } = useSWR("/api/trending", fetcher, {
     refreshInterval: 1000 * 5 * 60,
     onSuccess: () => {
       toast({
@@ -107,28 +108,28 @@ function Trending() {
       });
     },
   });
-  const repos = [...new Set(evts.map((issue) => issue.repo))];
+  const repos = [...new Set(issues.map((issue) => issue.repo))];
   return (
     <div>
-      <Tabs>
+      <Tabs size={"md"} variant="soft-rounded" colorScheme="green">
         <TabList>
           {repos.map((repo) => (
             <Tab key={repo}>
-              <Text fontWeight="bold">{repo}</Text>
+              <Text fontWeight="bold" px={3} fontSize="s">
+                {repo.split("-")[1]}
+              </Text>
             </Tab>
           ))}
         </TabList>
 
         <TabPanels>
           {repos.map((repo) => (
-            <TabPanel key={repo}>
-              {evts
+            <TabPanel w="100%" key={repo}>
+              {issues
                 .filter((issue) => issue.repo == repo)
                 .map((issue) => (
-                  <div key={issue.id}>
-                    <pre>{issue.state}</pre>
-
-                    <Flex m="4">
+                  <div w="100%" key={issue.id}>
+                    <Flex my="4">
                       <Avatar src={issue.avatar}>
                         {/* {issue.user_bug_count && (
                           <AvatarBadge
@@ -139,8 +140,8 @@ function Trending() {
                         )} */}
                       </Avatar>
                       <Box ml="3">
-                        <Text fontWeight="bold">
-                          <Badge mx="1" colorScheme="green">
+                        <Text w="100%" fontWeight="bold">
+                          <Badge mx="1" variant="outline" colorScheme="green">
                             {issue.repo}
                           </Badge>
                           <Link href={issue.html_url} isExternal>
@@ -183,7 +184,11 @@ export default function Page({ fallback }) {
           <BreadcrumbLink href="#">Trending</BreadcrumbLink>
         </BreadcrumbItem>
       </Breadcrumb>
-      <Heading my="5">Trending</Heading>
+      <Heading my="6">
+        <Flex alignItems={"center"}>
+          <FiTrendingUp /> <Box ml={3}>Trending</Box>
+        </Flex>
+      </Heading>
       <Text fontSize="s" my="5">
         Most active issues during the last week. All activity is based on
         contributors.

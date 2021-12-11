@@ -10,7 +10,6 @@ import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
-  BreadcrumbSeparator,
   AvatarBadge,
   Badge,
   Text,
@@ -23,12 +22,14 @@ import {
   useToast,
 } from "@chakra-ui/react";
 
+import { FiMessageCircle } from "react-icons/fi";
+
 import { ExternalLinkIcon } from "@chakra-ui/icons";
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
 export async function getServerSideProps({ req }) {
-  const evts = await prisma.$queryRaw`
+  const needsResponseByRepo = await prisma.$queryRaw`
   SELECT distinct
 	issues.repo,
 	issues.title,
@@ -63,7 +64,7 @@ order by repo, issues.id;
   return {
     props: {
       fallback: {
-        "/api/pending": evts,
+        "/api/pending": needsResponseByRepo,
       },
     },
   };
@@ -71,7 +72,7 @@ order by repo, issues.id;
 
 function NeedsResponse() {
   const toast = useToast();
-  const { data: evts, error } = useSWR("/api/pending", fetcher, {
+  const { data: issues, error } = useSWR("/api/pending", fetcher, {
     refreshInterval: 1000 * 60 * 5,
     onSuccess: () => {
       toast({
@@ -81,14 +82,17 @@ function NeedsResponse() {
       });
     },
   });
-  const repos = [...new Set(evts.map((issue) => issue.repo))];
+  const repos = [...new Set(issues.map((issue) => issue.repo))];
   return (
     <div>
-      <Tabs>
+      <Tabs size={"md"} variant="soft-rounded" colorScheme="green">
         <TabList>
           {repos.map((repo) => (
             <Tab key={repo}>
-              <Text fontWeight="bold">{repo}</Text>
+              <Text fontWeight="bold" px={3}>
+                {" "}
+                {repo.split("-")[1]}
+              </Text>
             </Tab>
           ))}
         </TabList>
@@ -96,13 +100,11 @@ function NeedsResponse() {
         <TabPanels>
           {repos.map((repo) => (
             <TabPanel key={repo}>
-              {evts
+              {issues
                 .filter((issue) => issue.repo == repo)
                 .map((issue) => (
                   <div key={issue.id}>
-                    {/* <pre>{issue.state}</pre> */}
-
-                    <Flex m="4">
+                    <Flex my="4">
                       <Avatar src={issue.avatar}>
                         {/* {issue.user_bug_count && (
                           <AvatarBadge
@@ -114,7 +116,7 @@ function NeedsResponse() {
                       </Avatar>
                       <Box ml="3">
                         <Text fontWeight="bold">
-                          <Badge mx="1" colorScheme="green">
+                          <Badge mx="1" variant="outline" colorScheme="green">
                             {issue.repo}
                           </Badge>
                           <Link href={issue.html_url} isExternal>
@@ -148,7 +150,11 @@ export default function Page({ fallback }) {
           <BreadcrumbLink href="#">Pending</BreadcrumbLink>
         </BreadcrumbItem>
       </Breadcrumb>
-      <Heading my="5">Needs response</Heading>
+      <Heading my="6">
+        <Flex alignItems={"center"}>
+          <FiMessageCircle /> <Box ml={3}>Needs response</Box>
+        </Flex>
+      </Heading>
       <Text fontSize="s" my="5"></Text>
 
       <SWRConfig value={{ fallback }}>
