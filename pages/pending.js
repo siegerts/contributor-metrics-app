@@ -3,6 +3,7 @@ import prisma from "../lib/prisma";
 
 import {
   Container,
+  Code,
   Heading,
   Flex,
   Box,
@@ -155,8 +156,10 @@ export default function Page({ fallback }) {
           <FiMessageCircle /> <Box ml={3}>Needs response</Box>
         </Flex>
       </Heading>
-      <Text fontSize="s" my="5"></Text>
-
+      <Text fontSize="s" my="5">
+        <Code>pending-response</Code> label is present and the customer has
+        responded.
+      </Text>
       <SWRConfig value={{ fallback }}>
         <NeedsResponse />
       </SWRConfig>
