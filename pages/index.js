@@ -12,7 +12,7 @@ import {
 import { FiTrendingUp, FiMessageCircle } from "react-icons/fi";
 
 const LinkItems = [
-  { name: "Trending", url: "/trending", icon: FiTrendingUp },
+  { name: "Trending by repo", url: "/trending", icon: FiTrendingUp },
   { name: "Needs response", url: "/pending", icon: FiMessageCircle },
 ];
 
