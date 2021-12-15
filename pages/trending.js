@@ -190,7 +190,7 @@ export default function Page({ fallback }) {
         </Flex>
       </Heading>
       <Text fontSize="s" my="5">
-        Most active issues during the last week. All activity is based on
+        Most active open issues during the last week. All activity is based on
         contributors.
       </Text>
 
