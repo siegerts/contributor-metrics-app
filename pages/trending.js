@@ -20,11 +20,13 @@ import {
   TabList,
   TabPanel,
   TabPanels,
+  Tooltip,
   useToast,
 } from "@chakra-ui/react";
 
-import { FiTrendingUp } from "react-icons/fi";
+import { formatDistance, parseJSON } from "date-fns";
 
+import { FiTrendingUp } from "react-icons/fi";
 import { ExternalLinkIcon } from "@chakra-ui/icons";
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
@@ -129,35 +131,52 @@ function Trending() {
                 .filter((issue) => issue.repo == repo)
                 .map((issue) => (
                   <div w="100%" key={issue.id}>
-                    <Flex my="4">
-                      <Avatar src={issue.avatar}>
-                        {/* {issue.user_bug_count && (
+                    <Flex my="5">
+                      <Tooltip label={`opened by ${issue.username}`}>
+                        <Avatar src={issue.avatar}>
+                          {/* {issue.user_bug_count && (
                           <AvatarBadge
                             borderColor="papayawhip"
                             bg="tomato"
                             boxSize="1.25em"
                           />
                         )} */}
-                      </Avatar>
+                        </Avatar>
+                      </Tooltip>
                       <Box ml="3">
-                        <Text w="100%" fontWeight="bold">
+                        <Text fontWeight="bold">
                           <Badge mx="1" variant="outline" colorScheme="green">
-                            {issue.repo}
+                            {issue.repo.split("-")[1]}
                           </Badge>
                           <Link href={issue.html_url} isExternal>
                             {issue.title} <ExternalLinkIcon mx="1px" />
                           </Link>
                         </Text>
-                        <Text mx="1" fontSize="s">
-                          {issue.comments} recent comments
-                          <Tag mx={2}>👍 {issue["+1"]}</Tag>
-                          <Tag mr={2}>
-                            👎
-                            {issue["-1"]}
-                          </Tag>
-                          <Tag mr={2}>👀 {issue.eyes}</Tag>
-                          <Tag mr={2}>❤️ {issue["heart"]}</Tag>
-                        </Text>
+                        <Flex justify={"between"}>
+                          <Text mx="1" fontSize="sm">
+                            {issue.comments} recent comment
+                            {issue.comments > 1 ? "s" : ""} •{" "}
+                          </Text>
+                          <Text mx="1" fontSize="sm">
+                            updated{" "}
+                            {formatDistance(
+                              parseJSON(issue.updated_at),
+                              new Date(),
+                              {
+                                addSuffix: true,
+                              }
+                            )}
+                          </Text>
+                          <Box>
+                            <Tag mx={2}>👍 {issue["+1"]}</Tag>
+                            <Tag mr={2}>
+                              👎
+                              {issue["-1"]}
+                            </Tag>
+                            <Tag mr={2}>👀 {issue.eyes}</Tag>
+                            <Tag mr={2}>❤️ {issue["heart"]}</Tag>
+                          </Box>
+                        </Flex>
                       </Box>
                     </Flex>
                   </div>

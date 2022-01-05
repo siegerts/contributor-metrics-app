@@ -20,11 +20,12 @@ import {
   TabList,
   TabPanel,
   TabPanels,
+  Tooltip,
   useToast,
 } from "@chakra-ui/react";
 
+import { formatDistance, parseJSON } from "date-fns";
 import { FiMessageCircle } from "react-icons/fi";
-
 import { ExternalLinkIcon } from "@chakra-ui/icons";
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
@@ -36,6 +37,7 @@ export async function getServerSideProps({ req }) {
 	issues.title,
 	issues.id,
 	issues.html_url,
+  issues.username,
 	issues.comments,
     issues.user->>'avatar_url' as avatar,
 	issues.created_at,
@@ -59,7 +61,7 @@ where (label->>'name' LIKE 'pending%response%' or label->>'name' LIKE 'pending-c
 	and issues.state='open'
 	and events.updated_at = events.max_date
 	and events.username not in (select login from public.members)
-order by repo, issues.id;
+order by repo, issues.updated_at desc;
   `;
 
   return {
@@ -106,23 +108,27 @@ function NeedsResponse() {
                 .map((issue) => (
                   <div key={issue.id}>
                     <Flex my="4">
-                      <Avatar src={issue.avatar}>
-                        {/* {issue.user_bug_count && (
-                          <AvatarBadge
-                            borderColor="papayawhip"
-                            bg="tomato"
-                            boxSize="1.25em"
-                          />
-                        )} */}
-                      </Avatar>
+                      <Tooltip label={`opened by ${issue.username}`}>
+                        <Avatar src={issue.avatar}></Avatar>
+                      </Tooltip>
                       <Box ml="3">
                         <Text fontWeight="bold">
                           <Badge mx="1" variant="outline" colorScheme="green">
-                            {issue.repo}
+                            {issue.repo.split("-")[1]}
                           </Badge>
                           <Link href={issue.html_url} isExternal>
                             {issue.title} <ExternalLinkIcon mx="1px" />
                           </Link>
+                        </Text>
+                        <Text mx="1" fontSize="sm">
+                          last updated{" "}
+                          {formatDistance(
+                            parseJSON(issue.updated_at),
+                            new Date(),
+                            {
+                              addSuffix: true,
+                            }
+                          )}
                         </Text>
                         <Text mx="1" fontSize="s"></Text>
                       </Box>

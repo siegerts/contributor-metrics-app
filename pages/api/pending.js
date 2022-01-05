@@ -7,6 +7,7 @@ export default async function handle(req, res) {
   issues.title,
   issues.id,
   issues.html_url,
+  issues.username,
   issues.comments,
   issues.user->>'avatar_url' as avatar,
   issues.created_at,
@@ -30,7 +31,7 @@ where (label->>'name' LIKE 'pending%response%' or label->>'name' LIKE 'pending-c
   and issues.state='open'
   and events.updated_at = events.max_date
   and events.username not in (select login from public.members)
-order by repo, issues.id;
+order by repo, issues.updated_at desc
   `;
 
   res.json(evts);
