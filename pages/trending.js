@@ -1,5 +1,6 @@
 import useSWR, { SWRConfig } from "swr";
 import prisma from "../lib/prisma";
+import { useEffect, useState } from "react";
 
 import {
   Container,
@@ -7,7 +8,6 @@ import {
   Flex,
   Box,
   Avatar,
-  AvatarBadge,
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
@@ -15,6 +15,7 @@ import {
   Text,
   Tag,
   Link,
+  Select,
   Tabs,
   Tab,
   TabList,
@@ -100,7 +101,7 @@ export async function getServerSideProps({ req }) {
 
 function Trending() {
   const toast = useToast();
-  const { data: issues, error } = useSWR("/api/trending", fetcher, {
+  const { data: issues, error } = useSWR(`/api/trending`, fetcher, {
     refreshInterval: 1000 * 5 * 60,
     onSuccess: () => {
       toast({
@@ -110,7 +111,15 @@ function Trending() {
       });
     },
   });
+
   const repos = [...new Set(issues.map((issue) => issue.repo))];
+
+  if (error) return <div>failed to load</div>;
+  if (Array.isArray(issues) && !issues.length)
+    return (
+      <Text color="gray.500">This looks empty for now. Check back later!</Text>
+    );
+
   return (
     <div>
       <Tabs size={"md"} variant="soft-rounded" colorScheme="green">
@@ -133,15 +142,7 @@ function Trending() {
                   <div w="100%" key={issue.id}>
                     <Flex my="5">
                       <Tooltip label={`opened by ${issue.username}`}>
-                        <Avatar src={issue.avatar}>
-                          {/* {issue.user_bug_count && (
-                          <AvatarBadge
-                            borderColor="papayawhip"
-                            bg="tomato"
-                            boxSize="1.25em"
-                          />
-                        )} */}
-                        </Avatar>
+                        <Avatar src={issue.avatar}></Avatar>
                       </Tooltip>
                       <Box ml="3">
                         <Text fontWeight="bold">
@@ -190,9 +191,6 @@ function Trending() {
 }
 
 export default function Page({ fallback }) {
-  // if (error) return <div>Failed to load</div>;
-  // if (!data) return <div>Loading...</div>;
-
   return (
     <Container maxW="container.lg" my={5}>
       <Breadcrumb fontWeight="medium" fontSize="sm">
@@ -208,9 +206,26 @@ export default function Page({ fallback }) {
           <FiTrendingUp /> <Box ml={3}>Trending</Box>
         </Flex>
       </Heading>
+      {/* <Box maxW="sm">
+        <Select
+          onChange={(e) => handleIntervalChange(e)}
+          variant="filled"
+          placeholder="Select option"
+        >
+          <option key="1" value="1">
+            1 week
+          </option>
+          <option key="2" value="2">
+            2 weeks
+          </option>
+          <option key="4" value="4">
+            4 weeks
+          </option>
+        </Select>
+      </Box> */}
       <Text fontSize="s" my="5">
-        Most active open issues during the last week. All activity is based on
-        contributors.
+        Most active open issues during the last week (7 days). All activity is
+        based on contributors.
       </Text>
 
       <SWRConfig value={{ fallback }}>

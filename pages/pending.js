@@ -85,7 +85,17 @@ function NeedsResponse() {
       });
     },
   });
+
+  if (error) return <div>failed to load</div>;
+  if (Array.isArray(issues) && !issues.length)
+    return (
+      <Text color="gray.500">
+        This looks empty for now. Check back later 🚀
+      </Text>
+    );
+
   const repos = [...new Set(issues.map((issue) => issue.repo))];
+
   return (
     <div>
       <Tabs size={"md"} variant="soft-rounded" colorScheme="green">
