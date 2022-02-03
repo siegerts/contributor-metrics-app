@@ -33,62 +33,7 @@ import { ExternalLinkIcon } from "@chakra-ui/icons";
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
 export async function getServerSideProps({ req }) {
-  const trendingByRepo = await prisma.$queryRaw`
-  SELECT * from
-	(select
-    issues.id,
-    ROW_NUMBER() over (PARTITION BY issues.repo order by events.comments desc) as rownum,
-    issues.repo,
-    issues.title,
-    issues.html_url,
-	  issues.username,
-    issues.user->>'avatar_url' as avatar,
-    issues.created_at,
-	  issues.updated_at,
-    events.*,
-    (events."+1" + (issues.reactions->'+1')::int) as "+1",
-    (events."-1" + (issues.reactions->'-1')::int) as "-1",
-    (events.eyes + (issues.reactions->'eyes')::int) as eyes,
-    (events.heart + (issues.reactions->'heart')::int) as heart,
-    (events.laugh + (issues.reactions->'laugh')::int) as laugh,
-    (events.hooray + (issues.reactions->'hooray')::int) as hooray,
-    (events.rocket + (issues.reactions->'rocket')::int) as rocket,
-    (events.confused + (issues.reactions->'confused')::int) as confused,
-    (events.total_count + (issues.reactions->'total_count')::int) as total_count
-	from
-    (
-      select issue_id as id,
-      count(*) as comments,
-      sum((reactions->'+1')::int) as "+1",
-      sum((reactions->'-1')::int) as "-1",
-      sum((reactions->'eyes')::int) as eyes,
-      sum((reactions->'heart')::int) as heart,
-      sum((reactions->'laugh')::int) as laugh,
-      sum((reactions->'hooray')::int) as hooray,
-      sum((reactions->'rocket')::int) as rocket,
-      sum((reactions->'confused')::int) as confused,
-      sum((reactions->'total_count')::int) as total_count
-      FROM public.events 
-      where username not in (select login from public.members) and 
-          updated_at >= now() - INTERVAL'1 week'
-      group by issue_id
-	) as events
-	inner join
-	public.issues using (id)
-	where issues.state='open'
-	order by repo, comments desc) trends 
-	left outer join
-	(
-    SELECT username, repo, count(*) as user_bug_count
-	  FROM public.issues 
-    cross join jsonb_array_elements(array_to_json(labels)::jsonb) as label
-    where value->>'name'='bug'
-	  group by repo, "user", username
-  ) bug_count
-	using (username, repo)
-	where trends.rownum <= 10
-  order by trends.repo, trends.comments desc, updated_at;
-  `;
+  const trendingByRepo = await prisma.trendingOpen.findMany();
 
   return {
     props: {
@@ -140,7 +85,7 @@ function Trending() {
                 .filter((issue) => issue.repo == repo)
                 .map((issue) => (
                   <div w="100%" key={issue.id}>
-                    <Flex my="5">
+                    <Flex my="9">
                       <Tooltip label={`opened by ${issue.username}`}>
                         <Avatar src={issue.avatar}></Avatar>
                       </Tooltip>
@@ -154,11 +99,14 @@ function Trending() {
                           </Link>
                         </Text>
                         <Flex justify={"between"}>
-                          <Text mx="1" fontSize="sm">
-                            {issue.comments} recent comment
-                            {issue.comments > 1 ? "s" : ""} •{" "}
+                          <Text mr="1" fontSize="sm">
+                            #{issue.number} •{" "}
                           </Text>
-                          <Text mx="1" fontSize="sm">
+                          <Text mr="1" fontSize="sm">
+                            {issue.r_comments} recent comment
+                            {issue.r_comments > 1 ? "s" : ""} •{" "}
+                          </Text>
+                          <Text mr="1" fontSize="sm">
                             updated{" "}
                             {formatDistance(
                               parseJSON(issue.updated_at),
@@ -169,10 +117,10 @@ function Trending() {
                             )}
                           </Text>
                           <Box>
-                            <Tag mx={2}>👍 {issue["+1"]}</Tag>
+                            <Tag mx={2}>👍 {issue["p1"]}</Tag>
                             <Tag mr={2}>
                               👎
-                              {issue["-1"]}
+                              {issue["m1"]}
                             </Tag>
                             <Tag mr={2}>👀 {issue.eyes}</Tag>
                             <Tag mr={2}>❤️ {issue["heart"]}</Tag>

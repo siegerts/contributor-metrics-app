@@ -31,38 +31,7 @@ import { ExternalLinkIcon } from "@chakra-ui/icons";
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
 export async function getServerSideProps({ req }) {
-  const needsResponseByRepo = await prisma.$queryRaw`
-  SELECT distinct
-	issues.repo,
-	issues.title,
-	issues.id,
-	issues.html_url,
-  issues.username,
-	issues.comments,
-    issues.user->>'avatar_url' as avatar,
-	issues.created_at,
-	issues.updated_at,
-    issues.state,
-	events.updated_at as evt_updated_at,
-	events.max_date
-FROM public.issues
-cross join jsonb_array_elements(array_to_json(labels)::jsonb) as label
-inner join 
-	(select 
-	 	issue_id as id,
-	 	username,
-	 	updated_at,
-	 	max(updated_at) over (PARTITION BY issue_id) as max_date
-	 from public.events 
-	 where event='commented'
-	) events 
-using (id)
-where (label->>'name' LIKE 'pending%response%' or label->>'name' LIKE 'pending-close%') 
-	and issues.state='open'
-	and events.updated_at = events.max_date
-	and events.username not in (select login from public.members)
-order by repo, issues.updated_at desc;
-  `;
+  const needsResponseByRepo = await prisma.pending.findMany();
 
   return {
     props: {
@@ -75,6 +44,7 @@ order by repo, issues.updated_at desc;
 
 function NeedsResponse() {
   const toast = useToast();
+
   const { data: issues, error } = useSWR("/api/pending", fetcher, {
     refreshInterval: 1000 * 60 * 5,
     onSuccess: () => {
@@ -94,7 +64,7 @@ function NeedsResponse() {
       </Text>
     );
 
-  const repos = [...new Set(issues.map((issue) => issue.repo))];
+  const repos = [...new Set(issues.map((issue) => issue.repo_display))];
 
   return (
     <div>
@@ -104,7 +74,7 @@ function NeedsResponse() {
             <Tab key={repo}>
               <Text fontWeight="bold" px={3}>
                 {" "}
-                {repo.split("-")[1]}
+                {repo}
               </Text>
             </Tab>
           ))}
@@ -114,24 +84,24 @@ function NeedsResponse() {
           {repos.map((repo) => (
             <TabPanel key={repo}>
               {issues
-                .filter((issue) => issue.repo == repo)
+                .filter((issue) => issue.repo_display == repo)
                 .map((issue) => (
                   <div key={issue.id}>
-                    <Flex my="4">
+                    <Flex my="6">
                       <Tooltip label={`opened by ${issue.username}`}>
                         <Avatar src={issue.avatar}></Avatar>
                       </Tooltip>
                       <Box ml="3">
                         <Text fontWeight="bold">
                           <Badge mx="1" variant="outline" colorScheme="green">
-                            {issue.repo.split("-")[1]}
+                            {issue.repo_display}
                           </Badge>
                           <Link href={issue.html_url} isExternal>
                             {issue.title} <ExternalLinkIcon mx="1px" />
                           </Link>
                         </Text>
                         <Text mx="1" fontSize="sm">
-                          last updated{" "}
+                          #{issue.number} last updated{" "}
                           {formatDistance(
                             parseJSON(issue.updated_at),
                             new Date(),
@@ -154,9 +124,6 @@ function NeedsResponse() {
 }
 
 export default function Page({ fallback }) {
-  // if (error) return <div>Failed to load</div>;
-  // if (!data) return <div>Loading...</div>;
-
   return (
     <Container maxW="container.lg" my={5}>
       <Breadcrumb fontWeight="medium" fontSize="sm">
