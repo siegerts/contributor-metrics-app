@@ -8,6 +8,7 @@ CREATE or REPLACE VIEW trending_open as
         trends.html_url,
         trends.assignee,
         trends.assignees,
+        trends.labels,
         trends.username,
         trends.avatar,
         trends.created_at,
@@ -33,12 +34,13 @@ CREATE or REPLACE VIEW trending_open as
         trends.tc
     FROM ( SELECT issues.id,
                 issues.number,
-                row_number() OVER (PARTITION BY issues.repo ORDER BY r_events.comments DESC) AS rank,
-                issues.repo,
+                row_number() OVER (PARTITION BY r_events.repo ORDER BY r_events.comments DESC, issues.updated_at) AS rank,
+		  		r_events.repo,
                 issues.title,
                 issues.html_url,
                 issues.assignee,
                 issues.assignees,
+                issues.labels,
                 issues.username,
                 issues."user" ->> 'avatar_url'::text AS avatar,
                 issues.created_at,
@@ -62,7 +64,9 @@ CREATE or REPLACE VIEW trending_open as
                 r_events.r_rocket + (issues.reactions -> 'rocket'::text)::integer AS rocket,
                 r_events.r_confused + (issues.reactions -> 'confused'::text)::integer AS confused,
                 (issues.reactions -> 'total_count'::text)::integer AS tc
-            FROM ( SELECT events.issue_id,
+            FROM ( SELECT 
+				  		events.issue_id,
+				  		events.repo,
                         count(*) AS comments,
                         sum((events.reactions -> '+1'::text)::integer) AS "r_+1",
                         sum((events.reactions -> '-1'::text)::integer) AS "r_-1",
@@ -75,13 +79,14 @@ CREATE or REPLACE VIEW trending_open as
                         sum((events.reactions -> 'total_count'::text)::integer) AS r_tc
                     FROM events
                     WHERE NOT (events.username::text IN ( SELECT members.login
-                            FROM members)) AND events.username::text !~~ '%github-actions[bot]%'::text AND events.updated_at >= (now() - '1 week'::interval)
-                    GROUP BY events.issue_id) r_events
+                            FROM members)) AND events.username::text !~~ '%github-actions[bot]%'::text AND events.updated_at >= (now() - '7 days'::interval)
+                    GROUP BY events.repo, events.issue_id) r_events
                 JOIN issues ON r_events.issue_id = issues.id
-            WHERE issues.state::text = 'open'::text
-            ORDER BY issues.repo, r_events.comments DESC) trends
+            WHERE issues.state::text = 'open'::text 
+            ORDER BY issues.repo, r_events.comments DESC
+		 ) trends
     WHERE trends.rank <= 10
-    ORDER BY trends.repo, trends.r_comments DESC, trends.updated_at;
+	ORDER BY trends.repo, trends.r_comments DESC, trends.updated_at;
 
 
 SELECT issues.number,

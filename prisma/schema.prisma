@@ -158,6 +158,7 @@ model trendingOpen {
   html_url   String?
   assignee   Json?
   assignees  Json[]    @db.Json
+  labels     Json[]    @db.Json
   username   String?
   avatar     String?
   created_at DateTime? @db.Timestamp(6)
