@@ -88,60 +88,61 @@ CREATE or REPLACE VIEW trending_open as
     WHERE trends.rank <= 10
 	ORDER BY trends.repo, trends.r_comments DESC, trends.updated_at;
 
-
-SELECT issues.number,
-    issues.repo,
-    issues.title,
-    issues.html_url,
-    issues.assignee,
-    issues.assignees,
-    issues.username,
-    issues."user" ->> 'avatar_url'::text AS avatar,
-    issues.created_at,
-    issues.updated_at,
-    trends.id,
-    trends.comments,
-    trends."r_+1",
-    trends."r_-1",
-    trends.r_eyes,
-    trends.r_heart,
-    trends.r_laugh,
-    trends.r_hooray,
-    trends.r_rocket,
-    trends.r_confused,
-    trends.r_tc
-   FROM ( SELECT _e.issue_id AS id,
-            count(*) AS comments,
-            sum((_e.reactions -> '+1'::text)::integer) AS "r_+1",
-            sum((_e.reactions -> '-1'::text)::integer) AS "r_-1",
-            sum((_e.reactions -> 'eyes'::text)::integer) AS r_eyes,
-            sum((_e.reactions -> 'heart'::text)::integer) AS r_heart,
-            sum((_e.reactions -> 'laugh'::text)::integer) AS r_laugh,
-            sum((_e.reactions -> 'hooray'::text)::integer) AS r_hooray,
-            sum((_e.reactions -> 'rocket'::text)::integer) AS r_rocket,
-            sum((_e.reactions -> 'confused'::text)::integer) AS r_confused,
-            sum((_e.reactions -> 'total_count'::text)::integer) AS r_tc
-           FROM ( SELECT events.id,
-                    events.issue_id,
-                    events.org,
-                    events.repo,
-                    events.event,
-                    events.body,
-                    events.label,
-                    events.reactions,
-                    events.created_at,
-                    events.node_id,
-                    events."user",
-                    events.username,
-                    events.updated_at,
-                    events.author_association
-                   FROM events
-                  WHERE NOT (events.username::text IN ( SELECT members.login
-                           FROM members)) AND events.username::text !~~ '%github-actions[bot]%'::text AND events.updated_at >= (now() - '14 days'::interval)) _e
-             JOIN issues issues_1 ON _e.issue_id = issues_1.id AND issues_1.state::text = 'closed'::text AND _e.created_at > issues_1.closed_at
-          GROUP BY _e.issue_id) trends
-     JOIN issues USING (id)
-  ORDER BY issues.repo, trends.comments DESC, issues.updated_at;
+CREATE or REPLACE VIEW trending_closed as
+    SELECT issues.number,
+        issues.repo,
+        issues.title,
+        issues.html_url,
+        issues.labels,
+        issues.assignee,
+        issues.assignees,
+        issues.username,
+        issues."user" ->> 'avatar_url'::text AS avatar,
+        issues.created_at,
+        issues.updated_at,
+        trends.id,
+        trends.comments,
+        trends."r_+1",
+        trends."r_-1",
+        trends.r_eyes,
+        trends.r_heart,
+        trends.r_laugh,
+        trends.r_hooray,
+        trends.r_rocket,
+        trends.r_confused,
+        trends.r_tc
+    FROM ( SELECT _e.issue_id AS id,
+                count(*) AS comments,
+                sum((_e.reactions -> '+1'::text)::integer) AS "r_+1",
+                sum((_e.reactions -> '-1'::text)::integer) AS "r_-1",
+                sum((_e.reactions -> 'eyes'::text)::integer) AS r_eyes,
+                sum((_e.reactions -> 'heart'::text)::integer) AS r_heart,
+                sum((_e.reactions -> 'laugh'::text)::integer) AS r_laugh,
+                sum((_e.reactions -> 'hooray'::text)::integer) AS r_hooray,
+                sum((_e.reactions -> 'rocket'::text)::integer) AS r_rocket,
+                sum((_e.reactions -> 'confused'::text)::integer) AS r_confused,
+                sum((_e.reactions -> 'total_count'::text)::integer) AS r_tc
+            FROM ( SELECT events.id,
+                        events.issue_id,
+                        events.org,
+                        events.repo,
+                        events.event,
+                        events.body,
+                        events.label,
+                        events.reactions,
+                        events.created_at,
+                        events.node_id,
+                        events."user",
+                        events.username,
+                        events.updated_at,
+                        events.author_association
+                    FROM events
+                    WHERE NOT (events.username::text IN ( SELECT members.login
+                            FROM members)) AND events.username::text !~~ '%github-actions[bot]%'::text AND events.updated_at >= (now() - '14 days'::interval)) _e
+                JOIN issues issues_1 ON _e.issue_id = issues_1.id AND issues_1.state::text = 'closed'::text AND _e.created_at > issues_1.closed_at
+            GROUP BY _e.issue_id) trends
+        JOIN issues USING (id)
+    ORDER BY issues.repo, trends.comments DESC, issues.updated_at;
 
 
 -- needs response

@@ -1,6 +1,5 @@
 import useSWR, { SWRConfig } from "swr";
 import prisma from "../lib/prisma";
-import { useEffect, useState } from "react";
 
 import {
   Container,
@@ -15,7 +14,6 @@ import {
   Text,
   Tag,
   Link,
-  Select,
   Tabs,
   Tab,
   TabList,
@@ -154,23 +152,6 @@ export default function Page({ fallback }) {
           <FiTrendingUp /> <Box ml={3}>Trending</Box>
         </Flex>
       </Heading>
-      {/* <Box maxW="sm">
-        <Select
-          onChange={(e) => handleIntervalChange(e)}
-          variant="filled"
-          placeholder="Select option"
-        >
-          <option key="1" value="1">
-            1 week
-          </option>
-          <option key="2" value="2">
-            2 weeks
-          </option>
-          <option key="4" value="4">
-            4 weeks
-          </option>
-        </Select>
-      </Box> */}
       <Text fontSize="s" my="5">
         Most active open issues during the last week (7 days). All activity is
         based on contributors.

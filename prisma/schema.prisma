@@ -185,3 +185,30 @@ model trendingOpen {
 
   @@map("trending_open")
 }
+
+model trendingClosed {
+  id         Int       @id
+  number     Int
+  repo       String?
+  title      String?
+  html_url   String?
+  assignee   Json?
+  assignees  Json[]    @db.Json
+  labels     Json[]    @db.Json
+  username   String?
+  avatar     String?
+  created_at DateTime? @db.Timestamp(6)
+  updated_at DateTime? @db.Timestamp(6)
+  comments   Int
+  r_p1       Int       @map("r_+1")
+  r_m1       Int       @map("r_-1")
+  r_eyes     Int
+  r_heart    Int
+  r_laugh    Int
+  r_hooray   Int
+  r_rocket   Int
+  r_confused Int
+  r_tc       Int
+
+  @@map("trending_closed")
+}

@@ -1,6 +1,5 @@
 import useSWR, { SWRConfig } from "swr";
-import prisma from "../../lib/prisma";
-
+import prisma from "../../../lib/prisma";
 import { Divider } from "@chakra-ui/react";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
@@ -32,7 +31,7 @@ const fetcher = (url) => fetch(url).then((res) => res.json());
 export async function getServerSideProps(context) {
   const repo = context.params.repo;
 
-  const trending = await prisma.trendingOpen.findMany({
+  const trending = await prisma.trendingClosed.findMany({
     where: {
       repo: repo,
     },
@@ -42,7 +41,7 @@ export async function getServerSideProps(context) {
     props: {
       repo,
       fallback: {
-        [`/api/trending/${repo}`]: trending,
+        [`/api/trending/${repo}/closed`]: trending,
       },
     },
   };
@@ -52,16 +51,20 @@ function Trending({ repo }) {
   const router = useRouter();
   const toast = useToast();
 
-  const { data: issues, error } = useSWR(`/api/trending/${repo}`, fetcher, {
-    refreshInterval: 1000 * 5 * 60,
-    onSuccess: () => {
-      toast({
-        title: "Data refreshed",
-        position: "bottom-right",
-        isClosable: true,
-      });
-    },
-  });
+  const { data: issues, error } = useSWR(
+    `/api/trending/${repo}/closed`,
+    fetcher,
+    {
+      refreshInterval: 1000 * 5 * 60,
+      onSuccess: () => {
+        toast({
+          title: "Data refreshed",
+          position: "bottom-right",
+          isClosable: true,
+        });
+      },
+    }
+  );
 
   if (error) return <div>failed to load</div>;
   if (Array.isArray(issues) && !issues.length)
@@ -147,7 +150,7 @@ function Trending({ repo }) {
                 <Flex wrap my={2} alignItems={"center"} justify={"between"}>
                   <Flex wrap w="100%">
                     <Text mr="1" fontSize="sm">
-                      #{issue.number} • {issue.r_comments} recent comment
+                      #{issue.number} • {issue.comments} recent comment
                       {issue.r_comments > 1 ? "s" : ""} • updated{" "}
                       {formatDistance(parseJSON(issue.updated_at), new Date(), {
                         addSuffix: true,
@@ -197,13 +200,13 @@ function Trending({ repo }) {
                     </span>
                   </Box>
                   <Box my={2} display={"block"}>
-                    <Tag mr={2}>👍 {issue["p1"]}</Tag>
+                    <Tag mr={2}>👍 {issue["r_p1"]}</Tag>
                     <Tag mr={2}>
                       👎
-                      {issue["m1"]}
+                      {issue["r_m1"]}
                     </Tag>
-                    <Tag mr={2}>👀 {issue.eyes}</Tag>
-                    <Tag mr={2}>❤️ {issue["heart"]}</Tag>
+                    <Tag mr={2}>👀 {issue.r_eyes}</Tag>
+                    <Tag mr={2}>❤️ {issue["r_heart"]}</Tag>
                   </Box>
                 </Flex>
               </Box>
@@ -227,8 +230,11 @@ export default function Page({ repo, fallback }) {
         <BreadcrumbItem>
           <BreadcrumbLink href={`/trending`}>Trending</BreadcrumbLink>
         </BreadcrumbItem>
-        <BreadcrumbItem isCurrentPage>
+        <BreadcrumbItem>
           <BreadcrumbLink href={`/trending/${repo}`}>{repo}</BreadcrumbLink>
+        </BreadcrumbItem>
+        <BreadcrumbItem isCurrentPage>
+          <BreadcrumbLink href="#">Closed</BreadcrumbLink>
         </BreadcrumbItem>
       </Breadcrumb>
       <Heading my="6">
@@ -238,8 +244,8 @@ export default function Page({ repo, fallback }) {
       </Heading>
 
       <Text fontSize="s" my="5">
-        Most active open issues during the last week (7 days). All activity is
-        based on contributors.
+        Most active closed issues during the last 2 weeks (14 days). All
+        activity is based on contributors.
       </Text>
 
       <SWRConfig value={{ fallback }}>

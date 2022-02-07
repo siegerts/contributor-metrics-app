@@ -11,7 +11,6 @@ import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
-  AvatarBadge,
   Badge,
   Text,
   Link,
