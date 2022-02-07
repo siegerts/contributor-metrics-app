@@ -3,6 +3,7 @@ import prisma from "../lib/prisma";
 
 import {
   Container,
+  Divider,
   Code,
   Heading,
   Flex,
@@ -16,6 +17,8 @@ import {
   Link,
   Tabs,
   Tab,
+  Tag,
+  TagLabel,
   TabList,
   TabPanel,
   TabPanels,
@@ -86,11 +89,11 @@ function NeedsResponse() {
                 .filter((issue) => issue.repo_display == repo)
                 .map((issue) => (
                   <div key={issue.id}>
-                    <Flex my="6">
+                    <Flex my="9">
                       <Tooltip label={`opened by ${issue.username}`}>
                         <Avatar src={issue.avatar}></Avatar>
                       </Tooltip>
-                      <Box ml="3">
+                      <Box ml="3" w="100%">
                         <Text fontWeight="bold">
                           <Badge mx="1" variant="outline" colorScheme="green">
                             {issue.repo_display}
@@ -99,19 +102,65 @@ function NeedsResponse() {
                             {issue.title} <ExternalLinkIcon mx="1px" />
                           </Link>
                         </Text>
-                        <Text mx="1" fontSize="sm">
-                          #{issue.number} last updated{" "}
-                          {formatDistance(
-                            parseJSON(issue.updated_at),
-                            new Date(),
-                            {
-                              addSuffix: true,
-                            }
+
+                        <Flex
+                          wrap
+                          my={2}
+                          alignItems={"center"}
+                          justify={"between"}
+                        >
+                          <Flex wrap w="100%">
+                            <Text mr="1" fontSize="sm">
+                              #{issue.number} • {issue.comments} recent comment
+                              {issue.comments > 1 ? "s" : ""} • updated{" "}
+                              {formatDistance(
+                                parseJSON(issue.updated_at),
+                                new Date(),
+                                {
+                                  addSuffix: true,
+                                }
+                              )}
+                            </Text>
+                          </Flex>
+                          {!issue.assignee && (
+                            <Box>
+                              <Tag
+                                size="lg"
+                                colorScheme="yellow"
+                                borderRadius="full"
+                              >
+                                <TagLabel>No assignee</TagLabel>
+                              </Tag>
+                            </Box>
                           )}
-                        </Text>
-                        <Text mx="1" fontSize="s"></Text>
+
+                          {issue.assignee && (
+                            <Box>
+                              <Tag
+                                size="lg"
+                                colorScheme="gray"
+                                borderRadius="full"
+                              >
+                                <Avatar
+                                  src={issue.assignee?.avatar_url}
+                                  size="xs"
+                                  name={issue.assignee?.avatar_url}
+                                  ml={-1}
+                                  mr={2}
+                                />
+                                <TagLabel>{issue.assignee?.login}</TagLabel>
+                              </Tag>
+                            </Box>
+                          )}
+                        </Flex>
+                        <Flex
+                          w="100%"
+                          alignItems={"center"}
+                          justify={"between"}
+                        ></Flex>
                       </Box>
                     </Flex>
+                    <Divider />
                   </div>
                 ))}
             </TabPanel>
