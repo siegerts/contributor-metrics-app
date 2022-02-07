@@ -48,6 +48,64 @@ export async function getServerSideProps(context) {
   };
 }
 
+function StateNav({ repo }) {
+  const router = useRouter();
+  return (
+    <Box my={6}>
+      <NextLink href={`/trending/${repo}`} passhref>
+        <Link
+          fontSize={"sm"}
+          rounded={"md"}
+          px={3}
+          py={2}
+          ml={"-12px!important"}
+          mr={3}
+          bg={router.asPath === `/trending/${repo}` ? "green.50" : undefined}
+          fontWeight={router.asPath === `/trending/${repo}` ? 600 : 400}
+          color={
+            router.asPath === `/trending/${repo}` ? "green.700" : "gray.700"
+          }
+          _hover={{
+            bg: router.asPath === `/trending/${repo}` ? "green.50" : "gray.100",
+          }}
+        >
+          Open
+        </Link>
+      </NextLink>
+
+      <NextLink href={`/trending/${repo}/closed`} passhref>
+        <Link
+          fontSize={"sm"}
+          rounded={"md"}
+          px={3}
+          py={2}
+          ml={"-12px!important"}
+          mr={3}
+          bg={
+            router.asPath === `/trending/${repo}/closed`
+              ? "green.50"
+              : undefined
+          }
+          fontWeight={router.asPath === `/trending/${repo}/closed` ? 600 : 400}
+          color={
+            router.asPath === `/trending/${repo}/closed`
+              ? "green.700"
+              : "gray.700"
+          }
+          _hover={{
+            bg:
+              router.asPath === `/trending/${repo}/closed`
+                ? "green.50"
+                : "gray.100",
+          }}
+        >
+          Closed
+        </Link>
+      </NextLink>
+    </Box>
+  );
+}
+
 function Trending({ repo }) {
   const router = useRouter();
   const toast = useToast();
@@ -66,7 +124,12 @@ function Trending({ repo }) {
   if (error) return <div>failed to load</div>;
   if (Array.isArray(issues) && !issues.length)
     return (
-      <Text color="gray.500">This looks empty for now. Check back later!</Text>
+      <>
+        <StateNav repo={repo} />
+        <Text color="gray.500">
+          This looks empty for now. Check back later!
+        </Text>
+      </>
     );
 
   return (
