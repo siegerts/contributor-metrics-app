@@ -82,19 +82,19 @@ function StateNav({ repo }) {
           mr={3}
           bg={
             router.asPath === `/trending/${repo}/closed`
-              ? "green.50"
+              ? "purple.50"
               : undefined
           }
           fontWeight={router.asPath === `/trending/${repo}/closed` ? 600 : 400}
           color={
             router.asPath === `/trending/${repo}/closed`
-              ? "green.700"
+              ? "purple.700"
               : "gray.700"
           }
           _hover={{
             bg:
               router.asPath === `/trending/${repo}/closed`
-                ? "green.50"
+                ? "purple.50"
                 : "gray.100",
           }}
         >
@@ -168,19 +168,19 @@ function Trending({ repo }) {
           mr={3}
           bg={
             router.asPath === `/trending/${repo}/closed`
-              ? "green.50"
+              ? "purple.50"
               : undefined
           }
           fontWeight={router.asPath === `/trending/${repo}/closed` ? 600 : 400}
           color={
             router.asPath === `/trending/${repo}/closed`
-              ? "green.700"
+              ? "purple.700"
               : "gray.700"
           }
           _hover={{
             bg:
               router.asPath === `/trending/${repo}/closed`
-                ? "green.50"
+                ? "purple.50"
                 : "gray.100",
           }}
         >
