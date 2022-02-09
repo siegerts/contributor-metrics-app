@@ -214,7 +214,7 @@ function Trending({ repo }) {
                   <Flex wrap w="100%">
                     <Text mr="1" fontSize="sm">
                       #{issue.number} • {issue.comments} recent comment
-                      {issue.r_comments > 1 ? "s" : ""} • updated{" "}
+                      {issue.comments > 1 ? "s" : ""} • updated{" "}
                       {formatDistance(parseJSON(issue.updated_at), new Date(), {
                         addSuffix: true,
                       })}
