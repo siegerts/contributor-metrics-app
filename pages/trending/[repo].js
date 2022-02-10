@@ -281,9 +281,6 @@ export default function Page({ repo, fallback }) {
     <Container maxW="container.lg" my={8}>
       <Breadcrumb fontWeight="medium" fontSize="sm">
         <BreadcrumbItem>
-          <BreadcrumbLink href="/">Home</BreadcrumbLink>
-        </BreadcrumbItem>
-        <BreadcrumbItem>
           <BreadcrumbLink href={`/trending`}>Trending</BreadcrumbLink>
         </BreadcrumbItem>
         <BreadcrumbItem isCurrentPage>
