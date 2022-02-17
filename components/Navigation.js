@@ -13,12 +13,7 @@ import {
   useColorModeValue,
   useDisclosure,
 } from "@chakra-ui/react";
-import {
-  HamburgerIcon,
-  CloseIcon,
-  ChevronDownIcon,
-  ChevronRightIcon,
-} from "@chakra-ui/icons";
+import { HamburgerIcon, CloseIcon, ChevronDownIcon } from "@chakra-ui/icons";
 
 export default function WithSubnavigation() {
   const { isOpen, onToggle } = useDisclosure();
@@ -142,9 +137,7 @@ const DesktopSubNav = ({ label, href, subLabel }) => {
           justify={"flex-end"}
           align={"center"}
           flex={1}
-        >
-          {/* <Icon color={"orange.400"} w={5} h={5} as={ChevronRightIcon} /> */}
-        </Flex>
+        ></Flex>
       </Stack>
     </Link>
   );
@@ -288,19 +281,4 @@ const NAV_ITEMS = [
       },
     ],
   },
-  //   {
-  //     label: "Needs Response by Repo",
-  //     children: [
-  //       {
-  //         label: "Coming soon...",
-  //         // subLabel: "Find your dream design job",
-  //         href: "#",
-  //       },
-  //       //   {
-  //       //     label: "Freelance Projects",
-  //       //     subLabel: "An exclusive list for contract work",
-  //       //     href: "#",
-  //       //   },
-  //     ],
-  //   },
 ];

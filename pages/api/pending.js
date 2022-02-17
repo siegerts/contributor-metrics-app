@@ -1,7 +1,9 @@
 import prisma from "../../lib/prisma";
 
 export default async function handle(req, res) {
-  const evts = await prisma.pending.findMany();
+  if (req.method === "GET") {
+    const evts = await prisma.pending.findMany();
 
-  res.json(evts);
+    res.json(evts);
+  }
 }
