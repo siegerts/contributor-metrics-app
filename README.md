@@ -5,7 +5,7 @@
 - `/trending`
 - `/pending`
 
-** Repo Specific:**
+**Repo Specific:**
 
 - `/trending/{repo}`
 
@@ -21,7 +21,7 @@ yarn dev
 
 ## Amplify Build Settings
 
-> The prisma client is generated using the secrets retrieved with `update-env.sh`
+> The Prisma client is generated using the secrets retrieved with `update-env.sh`
 
 ```
 version: 1
@@ -51,8 +51,8 @@ frontend:
 
 **Prisma Schema**
 
-- /primsa/schema.prisma
+- `/primsa/schema.prisma`
 
 **Postgres View Reference**
 
-- /sql/views.sql
+- `/sql/views.sql`
