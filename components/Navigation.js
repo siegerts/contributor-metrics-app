@@ -250,7 +250,7 @@ const NAV_ITEMS = [
         href: "/trending/amplify-codegen",
       },
       {
-        label: "console",
+        label: "hosting",
         subLabel: "amplify-hosting",
         href: "/trending/amplify-hosting",
       },
