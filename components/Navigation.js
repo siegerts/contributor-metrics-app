@@ -251,8 +251,8 @@ const NAV_ITEMS = [
       },
       {
         label: "console",
-        subLabel: "amplify-console",
-        href: "/trending/amplify-console",
+        subLabel: "amplify-hosting",
+        href: "/trending/amplify-hosting",
       },
       {
         label: "docs",
