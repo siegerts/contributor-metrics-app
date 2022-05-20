@@ -245,6 +245,11 @@ const NAV_ITEMS = [
         href: "/trending/amplify-cli",
       },
       {
+        label: "category api",
+        subLabel: "amplify-category-api",
+        href: "/trending/amplify-category-api",
+      },
+      {
         label: "codegen",
         subLabel: "amplify-codegen",
         href: "/trending/amplify-codegen",
