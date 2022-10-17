@@ -270,9 +270,9 @@ const NAV_ITEMS = [
         href: "/trending/amplify-flutter",
       },
       {
-        label: "ios",
-        subLabel: "amplify-ios",
-        href: "/trending/amplify-ios",
+        label: "swift",
+        subLabel: "amplify-swift",
+        href: "/trending/amplify-swift",
       },
       {
         label: "js",

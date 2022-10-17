@@ -1,6 +1,6 @@
 import prisma from "../../../lib/prisma";
 
-export default async function handle(req, res) {
+export default async function handler(req, res) {
   const { repo } = req.query;
 
   if (req.method === "GET") {
