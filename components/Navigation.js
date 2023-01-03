@@ -230,9 +230,9 @@ const NAV_ITEMS = [
     label: "Trending by Repo",
     children: [
       {
-        label: "adminui",
-        subLabel: "amplify-adminui",
-        href: "/trending/amplify-adminui",
+        label: "studio",
+        subLabel: "amplify-studio",
+        href: "/trending/amplify-studio",
       },
       {
         label: "android",
