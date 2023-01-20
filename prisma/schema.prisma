@@ -212,3 +212,21 @@ model trendingClosed {
 
   @@map("trending_closed")
 }
+
+model sla {
+  id             Int       @id
+  repo           String?
+  repo_display   String?
+  adj_created_at  DateTime? @db.Timestamp(6)
+  title          String?
+  number         Int
+  html_url       String?
+  username       String?
+  comments       Int?
+  avatar         String?
+  assignee       Json?
+  labels         Json[]    @db.Json
+  created_at     DateTime? @db.Timestamp(6)
+  updated_at     DateTime? @db.Timestamp(6)
+  state          String?
+}
