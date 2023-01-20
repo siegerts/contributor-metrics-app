@@ -129,7 +129,7 @@ function NeedsResponse() {
                                 colorScheme="yellow"
                                 borderRadius="full"
                               >
-                                <TagLabel>No assignee</TagLabel>
+                                <TagLabel>Unassigned</TagLabel>
                               </Tag>
                             </Box>
                           )}

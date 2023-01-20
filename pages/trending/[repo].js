@@ -216,7 +216,7 @@ function Trending({ repo }) {
                   {!issue.assignee && (
                     <Box>
                       <Tag size="lg" colorScheme="yellow" borderRadius="full">
-                        <TagLabel>No assignee</TagLabel>
+                        <TagLabel>Unassigned</TagLabel>
                       </Tag>
                     </Box>
                   )}
